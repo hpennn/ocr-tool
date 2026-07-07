@@ -113,13 +113,13 @@
 
   <!-- Chat Area -->
   <main id="chat-area" class="flex-1 overflow-y-auto">
-    <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-4">
+    <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-4 border border-gray-200 rounded-xl bg-white shadow-sm mb-4">
       <!-- Messages will be inserted here by JS -->
     </div>
   </main>
 
   <!-- Bottom Input Area -->
-  <footer class="bg-white border-t border-gray-200 flex-shrink-0">
+  <footer class="bg-gray-50 border-t border-gray-200 flex-shrink-0">
     <div class="max-w-3xl mx-auto px-4 py-3">
       <label id="upload-area" class="flex flex-col items-center justify-center gap-2 py-4 px-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors group">
         <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -163,7 +163,7 @@
       div.className = 'flex justify-end msg-appear';
       div.innerHTML = `
         <div class="max-w-[75%] sm:max-w-[60%]">
-          <div class="bg-blue-600 rounded-2xl rounded-br-sm p-1 shadow-sm">
+          <div class="bg-blue-600 rounded-2xl rounded-br-sm p-1 shadow-sm border border-blue-400/30">
             <img src="${imageUrl}" alt="上传的图片" class="max-h-48 rounded-xl object-contain" />
           </div>
           <p class="text-xs text-gray-400 text-right mt-1 pr-1">刚刚</p>
