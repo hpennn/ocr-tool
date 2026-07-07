@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。纯前端处理，保护隐私，无需注册。" />
+  <meta name="keywords" content="OCR,图片文字提取,在线OCR,图片转文字,文字识别,免费OCR,中英文识别" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://ocr-tool.pages.dev" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="图片文字提取 - 免费在线OCR文字识别工具" />
+  <meta property="og:description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。" />
+  <meta property="og:site_name" content="图片文字提取" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="图片文字提取 - 免费在线OCR文字识别工具" />
+  <meta name="twitter:description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tesseract.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "图片文字提取",
+    "url": "https://ocr-tool.pages.dev",
+    "description": "免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。纯前端处理，保护隐私，无需注册。",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    }
+  }
+  </script>
+
+  <title>图片文字提取 - 免费在线OCR文字识别工具</title>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg class="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <path d="M7 7h4M7 11h10M7 15h7" />
+        </svg>
+        <div>
+          <h1 class="text-xl font-bold text-gray-900">图片文字提取</h1>
+          <p class="text-xs text-gray-500">免费、快速、隐私安全的在线 OCR 工具</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-4xl mx-auto px-4 py-8 w-full">
+
+    <!-- Upload Area -->
+    <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-2xl p-10 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors bg-white">
+      <div class="flex flex-col items-center gap-3">
+        <svg class="w-16 h-16 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <div>
+          <p class="text-lg font-medium text-gray-700">拖拽图片到这里，或点击上传</p>
+          <p class="text-sm text-gray-400 mt-1">支持 JPG / PNG / BMP / WebP，也可 Ctrl+V 粘贴</p>
+        </div>
+      </div>
+      <input type="file" id="file-input" accept="image/jpeg,image/png,image/bmp,image/webp" class="hidden" />
+    </div>
+
+    <!-- Image Preview -->
+    <div id="preview-section" class="hidden mt-6 bg-white rounded-xl border border-gray-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-medium text-gray-600">图片预览</h3>
+        <button id="clear-btn" class="text-sm text-red-500 hover:text-red-700 cursor-pointer">清除图片</button>
+      </div>
+      <img id="preview-img" class="max-h-64 mx-auto rounded-lg" alt="预览图片" />
+    </div>
+
+    <!-- Options & Action -->
+    <div id="options-section" class="hidden mt-6 bg-white rounded-xl border border-gray-200 p-5">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="lang-select" class="text-sm font-medium text-gray-700 whitespace-nowrap">识别语言：</label>
+          <select id="lang-select" class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <option value="chi_sim+eng">中文 + 英文</option>
+            <option value="eng">英文</option>
+            <option value="chi_tra+eng">中文繁体 + 英文</option>
+          </select>
+        </div>
+        <button id="recognize-btn" class="flex-1 sm:flex-none bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          开始识别
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress-section" class="hidden mt-6 bg-white rounded-xl border border-gray-200 p-5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium text-gray-700">正在识别...</span>
+        <span id="progress-text" class="text-sm text-gray-500">0%</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <p id="progress-status" class="text-xs text-gray-400 mt-2">准备中...</p>
+    </div>
+
+    <!-- Result -->
+    <div id="result-section" class="hidden mt-6 bg-white rounded-xl border border-gray-200 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-medium text-gray-600">识别结果</h3>
+        <button id="copy-btn" class="flex items-center gap-1.5 bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors cursor-pointer">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          复制文字
+        </button>
+      </div>
+      <textarea id="result-text" class="w-full h-48 border border-gray-200 rounded-lg p-3 text-sm leading-relaxed resize-y focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="识别结果将显示在这里..."></textarea>
+      <p id="copy-toast" class="hidden text-xs text-green-600 mt-2">已复制到剪贴板 ✓</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
+      <p>&copy; 2025 图片文字提取 · 纯前端处理 · 图片不会上传到任何服务器</p>
+    </div>
+  </footer>
+
+  <!-- OCR Script -->
+  <script>
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const previewSection = document.getElementById('preview-section');
+    const previewImg = document.getElementById('preview-img');
+    const optionsSection = document.getElementById('options-section');
+    const progressSection = document.getElementById('progress-section');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const progressStatus = document.getElementById('progress-status');
+    const resultSection = document.getElementById('result-section');
+    const resultText = document.getElementById('result-text');
+    const recognizeBtn = document.getElementById('recognize-btn');
+    const copyBtn = document.getElementById('copy-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const langSelect = document.getElementById('lang-select');
+    const copyToast = document.getElementById('copy-toast');
+
+    let currentFile = null;
+
+    // Upload area click
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('border-blue-400', 'bg-blue-50');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+      const file = e.dataTransfer?.files[0];
+      if (file && file.type.startsWith('image/')) handleFile(file);
+    });
+
+    // Paste
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) handleFile(file);
+          break;
+        }
+      }
+    });
+
+    // Handle selected file
+    function handleFile(file) {
+      currentFile = file;
+      const url = URL.createObjectURL(file);
+      previewImg.src = url;
+      previewSection.classList.remove('hidden');
+      optionsSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+      progressSection.classList.add('hidden');
+    }
+
+    // Clear image
+    clearBtn.addEventListener('click', () => {
+      currentFile = null;
+      fileInput.value = '';
+      previewSection.classList.add('hidden');
+      optionsSection.classList.add('hidden');
+      progressSection.classList.add('hidden');
+      resultSection.classList.add('hidden');
+      previewImg.src = '';
+    });
+
+    // Recognize
+    recognizeBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      recognizeBtn.disabled = true;
+      recognizeBtn.textContent = '识别中...';
+      progressSection.classList.remove('hidden');
+      resultSection.classList.add('hidden');
+      progressBar.style.width = '0%';
+      progressText.textContent = '0%';
+
+      const lang = langSelect.value;
+
+      try {
+        const result = await Tesseract.recognize(currentFile, lang, {
+          logger: (m) => {
+            if (m.status === 'loading tesseract core') {
+              progressStatus.textContent = '加载识别引擎...';
+            } else if (m.status === 'initializing tesseract') {
+              progressStatus.textContent = '初始化引擎...';
+            } else if (m.status === 'loading language traineddata') {
+              progressStatus.textContent = '下载语言数据...';
+            } else if (m.status === 'initializing api') {
+              progressStatus.textContent = '准备识别...';
+            } else if (m.status === 'recognizing text') {
+              progressStatus.textContent = '正在识别文字...';
+            }
+            if (m.progress) {
+              const pct = Math.round(m.progress * 100);
+              progressBar.style.width = pct + '%';
+              progressText.textContent = pct + '%';
+            }
+          },
+        });
+
+        resultText.value = result.data.text;
+        resultSection.classList.remove('hidden');
+        progressSection.classList.add('hidden');
+      } catch (err) {
+        console.error('OCR Error:', err);
+        progressStatus.textContent = '识别失败，请重试';
+      } finally {
+        recognizeBtn.disabled = false;
+        recognizeBtn.textContent = '开始识别';
+      }
+    });
+
+    // Copy
+    copyBtn.addEventListener('click', async () => {
+      const text = resultText.value;
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyToast.classList.remove('hidden');
+        setTimeout(() => copyToast.classList.add('hidden'), 2000);
+      } catch {
+        resultText.select();
+        document.execCommand('copy');
+        copyToast.classList.remove('hidden');
+        setTimeout(() => copyToast.classList.add('hidden'), 2000);
+      }
+    });
+  </script>
+</body>
+</html>
