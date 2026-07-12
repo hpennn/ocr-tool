@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ocr-tool-v1';
-const STATIC_ASSETS = ['/', '/manifest.json', '/icon-192.png'];
+const CACHE_NAME = 'ocr-tool-v2';
+const STATIC_ASSETS = ['/', '/manifest.json', '/icon-192.png', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));

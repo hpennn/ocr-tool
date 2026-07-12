@@ -1,29 +1,606 @@
----
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。纯前端处理，保护隐私，无需注册。" />
+  <meta name="keywords" content="OCR,图片文字提取,在线OCR,图片转文字,文字识别,免费OCR,中英文识别" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://ocr-tool.pages.dev" />
 
----
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="图片文字提取 - 免费在线OCR文字识别工具" />
+  <meta property="og:description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。" />
+  <meta property="og:site_name" content="图片文字提取" />
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-		<link rel="manifest" href="/manifest.json">
-		<meta name="theme-color" content="#3b82f6">
-		<meta name="apple-mobile-web-app-capable" content="yes">
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-		<meta name="apple-mobile-web-app-title" content="OCR提取">
-		<link rel="apple-touch-icon" href="/favicon.svg">
-	<meta name="baidu-site-verification" content="codeva-6qBSpgTdBp" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="图片文字提取 - 免费在线OCR文字识别工具" />
+  <meta name="twitter:description" content="免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="图片文字提取">
+  <link rel="apple-touch-icon" href="/favicon.svg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tesseract.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "图片文字提取",
+    "url": "https://ocr-tool.pages.dev",
+    "description": "免费在线图片文字提取工具，支持中英文OCR识别。拖拽上传图片，一键提取文字，支持复制和编辑。纯前端处理，保护隐私，无需注册。",
+    "applicationCategory": "UtilityApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "CNY"
+    }
+  }
+  </script>
+
+  <title>图片文字提取 - 免费在线OCR文字识别工具</title>
+
+  <style>
+    @keyframes typing {
+      0%, 60% { opacity: 1; }
+      30% { opacity: 0.3; }
+      90%, 100% { opacity: 0; }
+    }
+    .typing-dot {
+      animation: typing 1.4s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    .msg-appear {
+      animation: msgSlideIn 0.3s ease-out;
+    }
+    @keyframes msgSlideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* Drag over state for body */
+    body.drag-over::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(59, 130, 246, 0.08);
+      border: 3px dashed #3b82f6;
+      border-radius: 0;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    /* Custom scrollbar */
+    #chat-area::-webkit-scrollbar { width: 6px; }
+    #chat-area::-webkit-scrollbar-track { background: transparent; }
+    #chat-area::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+    #chat-area::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+  </style>
+<!-- 百度统计 -->
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?dec78325955374caccdbc8ffc94cc8e7";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+<meta name="baidu-site-verification" content="codeva-6qBSpgTdBp" />
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
-	<body>
-		<h1>Astro</h1>
-		<script>
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('/sw.js').catch(() => {});
-			}
-		</script>
-	</body>
+<body class="h-screen bg-gray-50 flex flex-col overflow-hidden">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 flex-shrink-0 z-10">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-base font-semibold text-gray-900 leading-tight">图片文字提取</h1>
+        <p class="text-xs text-gray-400">纯前端 OCR · 隐私安全</p>
+      </div>
+      <button id="pwa-install-btn" style="display:none" class="text-xs text-gray-500 border border-gray-300 rounded-lg px-2 py-1 hover:bg-gray-100 transition-colors">添加到桌面</button>
+    </div>
+  </header>
+
+  <!-- Chat Area -->
+  <main id="chat-area" class="flex-1 overflow-y-auto">
+    <div id="messages" class="max-w-3xl mx-auto px-4 py-6 space-y-4 border border-gray-200 rounded-xl bg-white shadow-sm mb-4">
+      <!-- Messages will be inserted here by JS -->
+    </div>
+  </main>
+
+  <!-- Bottom Input Area -->
+  <footer class="bg-gray-50 border-t border-gray-200 flex-shrink-0">
+    <div class="max-w-3xl mx-auto px-4 py-3">
+      <label id="upload-area" class="flex flex-col items-center justify-center gap-2 py-4 px-4 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors group">
+        <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span class="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">点击或拖拽上传图片</span>
+        <span class="text-xs text-gray-400">支持 JPG / PNG / BMP / WebP，也可 Ctrl+V 粘贴</span>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/bmp,image/webp" class="hidden" />
+      </label>
+      <!-- Language selector (inline, subtle) -->
+      <div class="flex items-center justify-center gap-2 mt-2">
+        <span class="text-xs text-gray-400">识别语言：</span>
+        <select id="lang-select" class="text-xs text-gray-500 border border-gray-200 rounded px-2 py-1 bg-white focus:ring-1 focus:ring-blue-400 focus:border-blue-400 outline-none">
+          <option value="chi_sim+eng">中文 + 英文</option>
+          <option value="eng">英文</option>
+          <option value="chi_tra+eng">中文繁体 + 英文</option>
+        </select>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main Script -->
+  <script>
+    const chatArea = document.getElementById('chat-area');
+    const messagesEl = document.getElementById('messages');
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('file-input');
+    const langSelect = document.getElementById('lang-select');
+
+    // ===== Message helpers =====
+    function scrollToBottom() {
+      requestAnimationFrame(() => {
+        chatArea.scrollTop = chatArea.scrollHeight;
+      });
+    }
+
+    function createUserMessage(imageUrl) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-end msg-appear';
+      div.innerHTML = `
+        <div class="max-w-[75%] sm:max-w-[60%]">
+          <div class="bg-blue-600 rounded-2xl rounded-br-sm p-1 shadow-sm border border-blue-400/30">
+            <img src="${imageUrl}" alt="上传的图片" class="max-h-48 rounded-xl object-contain" />
+          </div>
+          <p class="text-xs text-gray-400 text-right mt-1 pr-1">刚刚</p>
+        </div>`;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function createTypingIndicator() {
+      const div = document.createElement('div');
+      div.className = 'flex justify-start msg-appear';
+      div.id = 'typing-indicator';
+      div.innerHTML = `
+        <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+          <div class="flex items-center gap-2">
+            <div class="flex gap-1">
+              <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
+              <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
+              <span class="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block"></span>
+            </div>
+            <span class="text-sm text-gray-500" id="typing-status">正在识别中...</span>
+          </div>
+          <div class="mt-2 w-48 bg-gray-200 rounded-full h-1.5">
+            <div id="progress-bar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width:0%"></div>
+          </div>
+          <p id="progress-status" class="text-xs text-gray-400 mt-1">准备中...</p>
+        </div>`;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function formatText(text) {
+      // Preserve line breaks, convert to <br>, handle multiple newlines as paragraph breaks
+      let escaped = escapeHtml(text);
+      // Convert double newlines to paragraph breaks
+      escaped = escaped.replace(/\n{2,}/g, '<br><br>');
+      // Convert single newlines to <br>
+      escaped = escaped.replace(/\n/g, '<br>');
+      return escaped;
+    }
+
+    function createResultMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-start msg-appear';
+      const formattedText = formatText(text);
+      const copyId = 'copy-' + Date.now();
+      div.innerHTML = `
+        <div class="max-w-[85%] sm:max-w-[75%]">
+          <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+            <p class="text-xs text-gray-400 mb-2">📝 识别结果</p>
+            <div class="text-sm text-gray-800 leading-relaxed break-words whitespace-pre-wrap">${formattedText}</div>
+            <div class="mt-3 pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
+              <button onclick="copyResult(this, '${copyId}')" class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                复制
+              </button>
+              <span class="copy-toast text-xs text-green-600 hidden">已复制 ✓</span>
+              <span class="text-gray-300">|</span>
+              <div class="relative export-dropdown">
+                <button onclick="toggleExportMenu(this)" class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  保存文档
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="export-menu hidden absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[120px]">
+                  <button onclick="exportText(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📄 纯文本 (.txt)</button>
+                  <button onclick="exportMarkdown(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📝 Markdown (.md)</button>
+                  <button onclick="exportPDF(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📕 PDF文档 (.pdf)</button>
+                  <button onclick="exportWord(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📘 Word文档 (.doc)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1 pl-1">刚刚</p>
+        </div>`;
+      // Store raw text for copying
+      div.dataset.rawText = text;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function createErrorMessage(msg) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-start msg-appear';
+      div.innerHTML = `
+        <div class="bg-red-50 border border-red-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm max-w-[80%]">
+          <p class="text-sm text-red-600">❌ ${escapeHtml(msg)}</p>
+        </div>`;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    function addSystemTextMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-start msg-appear';
+      div.innerHTML = `
+        <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm max-w-[85%] sm:max-w-[75%]">
+          <p class="text-sm text-gray-700 leading-relaxed">${text}</p>
+        </div>`;
+      messagesEl.appendChild(div);
+      scrollToBottom();
+      return div;
+    }
+
+    // ===== Copy function =====
+    function copyResult(btn, id) {
+      const msgDiv = btn.closest('[data-raw-text]');
+      const text = msgDiv?.dataset?.rawText || '';
+      const toast = btn.parentElement.querySelector('.copy-toast');
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        if (toast) {
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+      }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (toast) {
+          toast.classList.remove('hidden');
+          setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+      });
+    }
+
+    // ===== OCR Processing =====
+    async function processImage(file) {
+      // Show user message with image
+      const imageUrl = URL.createObjectURL(file);
+      createUserMessage(imageUrl);
+
+      // Show typing indicator
+      const typingEl = createTypingIndicator();
+      const progressBar = typingEl.querySelector('#progress-bar');
+      const progressStatus = typingEl.querySelector('#progress-status');
+      const typingStatus = typingEl.querySelector('#typing-status');
+
+      const lang = langSelect.value;
+
+      try {
+        const result = await Tesseract.recognize(file, lang, {
+          logger: (m) => {
+            if (m.status === 'loading tesseract core') {
+              progressStatus.textContent = '加载识别引擎...';
+              typingStatus.textContent = '加载引擎中...';
+            } else if (m.status === 'initializing tesseract') {
+              progressStatus.textContent = '初始化引擎...';
+            } else if (m.status === 'loading language traineddata') {
+              progressStatus.textContent = '下载语言数据...';
+              typingStatus.textContent = '下载数据中...';
+            } else if (m.status === 'initializing api') {
+              progressStatus.textContent = '准备识别...';
+            } else if (m.status === 'recognizing text') {
+              progressStatus.textContent = '正在识别文字...';
+              typingStatus.textContent = '识别中...';
+            }
+            if (m.progress) {
+              const pct = Math.round(m.progress * 100);
+              progressBar.style.width = pct + '%';
+            }
+          },
+        });
+
+        // Remove typing indicator
+        typingEl.remove();
+
+        const text = result.data.text.trim();
+        if (text) {
+          createResultMessage(text);
+        } else {
+          createErrorMessage('未识别到文字内容，请尝试更清晰的图片。');
+        }
+      } catch (err) {
+        console.error('OCR Error:', err);
+        typingEl.remove();
+        createErrorMessage('识别失败，请重试。' + (err.message ? ' (' + err.message + ')' : ''));
+      }
+    }
+
+    // ===== File handling =====
+    function handleFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        createErrorMessage('请上传图片文件（JPG / PNG / BMP / WebP）。');
+        return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        createErrorMessage('图片大小超过 20MB，请使用较小的图片。');
+        return;
+      }
+      processImage(file);
+      // Reset file input
+      fileInput.value = '';
+    }
+
+    // ===== Event listeners =====
+    // Click to upload
+    uploadArea.addEventListener('click', (e) => {
+      // Don't trigger if clicking on the select
+      if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file);
+    });
+
+    // Drag and drop on entire body
+    document.body.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      document.body.classList.add('drag-over');
+    });
+
+    document.body.addEventListener('dragleave', (e) => {
+      if (e.relatedTarget === null || !document.body.contains(e.relatedTarget)) {
+        document.body.classList.remove('drag-over');
+      }
+    });
+
+    document.body.addEventListener('drop', (e) => {
+      e.preventDefault();
+      document.body.classList.remove('drag-over');
+      const file = e.dataTransfer?.files[0];
+      if (file) handleFile(file);
+    });
+
+    // Paste
+    document.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) handleFile(file);
+          break;
+        }
+      }
+    });
+
+    // ===== Export functions =====
+    function getRawText(btn) {
+      return btn.closest('[data-raw-text]')?.dataset?.rawText || '';
+    }
+
+    function getTimestamp() {
+      const d = new Date();
+      return d.getFullYear() + '' +
+        String(d.getMonth()+1).padStart(2,'0') +
+        String(d.getDate()).padStart(2,'0') + '_' +
+        String(d.getHours()).padStart(2,'0') +
+        String(d.getMinutes()).padStart(2,'0');
+    }
+
+    function toggleExportMenu(btn) {
+      const menu = btn.nextElementSibling;
+      const wasHidden = menu.classList.contains('hidden');
+      document.querySelectorAll('.export-menu').forEach(m => m.classList.add('hidden'));
+      if (wasHidden) menu.classList.remove('hidden');
+    }
+
+    function exportText(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.txt');
+      closeExportMenu(btn);
+    }
+
+    function exportMarkdown(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const md = '# OCR 文字识别结果\n\n> 识别时间：' + new Date().toLocaleString('zh-CN') + '\n\n---\n\n' + text + '\n';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.md');
+      closeExportMenu(btn);
+    }
+
+    function exportPDF(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
+      const lineHeight = 7;
+      let y = margin;
+
+      doc.setFontSize(14);
+      doc.setTextColor(30, 64, 175);
+      doc.text('OCR Result', margin, y);
+      y += 10;
+
+      doc.setFontSize(8);
+      doc.setTextColor(156, 163, 175);
+      doc.text(new Date().toLocaleString('zh-CN'), margin, y);
+      y += 8;
+
+      doc.setDrawColor(229, 231, 235);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(31, 41, 55);
+
+      const lines = doc.splitTextToSize(text, maxWidth);
+      for (let i = 0; i < lines.length; i++) {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(lines[i], margin, y);
+        y += lineHeight;
+      }
+
+      doc.save('OCR提取_' + getTimestamp() + '.pdf');
+      closeExportMenu(btn);
+    }
+
+    function exportWord(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const html = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://schemas.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><title>OCR提取结果</title>
+        <style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.8;padding:2.5cm;}h1{font-size:16pt;color:#1e40af;border-bottom:1px solid #e5e7eb;padding-bottom:8pt;}p{margin:0 0 6pt 0;text-align:justify;}.meta{font-size:9pt;color:#9ca3af;margin-bottom:12pt;}</style>
+        </head><body>
+        <h1>OCR 文字识别结果</h1>
+        <p class="meta">识别时间：${new Date().toLocaleString('zh-CN')}</p>
+        ${text.split('\n').map(line => line.trim() ? `<p>${escapeHtml(line)}</p>` : '').join('\n')}
+        </body></html>`;
+      const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.doc');
+      closeExportMenu(btn);
+    }
+
+    function closeExportMenu(btn) {
+      const menu = btn.closest('.export-dropdown')?.querySelector('.export-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    // Close export menu on outside click
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.export-dropdown')) {
+        document.querySelectorAll('.export-menu').forEach(m => m.classList.add('hidden'));
+      }
+    });
+
+    // ===== Welcome message =====
+    (function init() {
+      addSystemTextMessage('你好！我是图片文字提取助手 📷<br><br>上传一张图片，我来帮你提取文字。<br>支持 <strong>中英文</strong> 识别，识别后可导出 <strong>TXT / Markdown / PDF / Word</strong> 文档。<br>所有处理都在浏览器本地完成，保护隐私。');
+    })();
+  </script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
+<script>
+(function(){
+  let deferredPrompt;
+  const installBtn = document.getElementById('pwa-install-btn');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'flex';
+  });
+  if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        installBtn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  }
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    if (installBtn) installBtn.style.display = 'none';
+  }
+})();
+</script>
+</body>
 </html>

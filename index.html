@@ -115,6 +115,8 @@ var _hmt = _hmt || [];
 })();
 </script>
 <meta name="baidu-site-verification" content="codeva-6qBSpgTdBp" />
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body class="h-screen bg-gray-50 flex flex-col overflow-hidden">
 
@@ -247,15 +249,33 @@ var _hmt = _hmt || [];
           <div class="bg-white border border-gray-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
             <p class="text-xs text-gray-400 mb-2">📝 识别结果</p>
             <div class="text-sm text-gray-800 leading-relaxed break-words whitespace-pre-wrap">${formattedText}</div>
-            <div class="mt-3 pt-2 border-t border-gray-100 flex items-center gap-2">
+            <div class="mt-3 pt-2 border-t border-gray-100 flex items-center gap-2 flex-wrap">
               <button onclick="copyResult(this, '${copyId}')" class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
-                复制文字
+                复制
               </button>
               <span class="copy-toast text-xs text-green-600 hidden">已复制 ✓</span>
+              <span class="text-gray-300">|</span>
+              <div class="relative export-dropdown">
+                <button onclick="toggleExportMenu(this)" class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 cursor-pointer transition-colors">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  保存文档
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="export-menu hidden absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[120px]">
+                  <button onclick="exportText(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📄 纯文本 (.txt)</button>
+                  <button onclick="exportMarkdown(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📝 Markdown (.md)</button>
+                  <button onclick="exportPDF(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📕 PDF文档 (.pdf)</button>
+                  <button onclick="exportWord(this)" class="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer flex items-center gap-2">📘 Word文档 (.doc)</button>
+                </div>
+              </div>
             </div>
           </div>
           <p class="text-xs text-gray-400 mt-1 pl-1">刚刚</p>
@@ -434,9 +454,119 @@ var _hmt = _hmt || [];
       }
     });
 
+    // ===== Export functions =====
+    function getRawText(btn) {
+      return btn.closest('[data-raw-text]')?.dataset?.rawText || '';
+    }
+
+    function getTimestamp() {
+      const d = new Date();
+      return d.getFullYear() + '' +
+        String(d.getMonth()+1).padStart(2,'0') +
+        String(d.getDate()).padStart(2,'0') + '_' +
+        String(d.getHours()).padStart(2,'0') +
+        String(d.getMinutes()).padStart(2,'0');
+    }
+
+    function toggleExportMenu(btn) {
+      const menu = btn.nextElementSibling;
+      const wasHidden = menu.classList.contains('hidden');
+      document.querySelectorAll('.export-menu').forEach(m => m.classList.add('hidden'));
+      if (wasHidden) menu.classList.remove('hidden');
+    }
+
+    function exportText(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.txt');
+      closeExportMenu(btn);
+    }
+
+    function exportMarkdown(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const md = '# OCR 文字识别结果\n\n> 识别时间：' + new Date().toLocaleString('zh-CN') + '\n\n---\n\n' + text + '\n';
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.md');
+      closeExportMenu(btn);
+    }
+
+    function exportPDF(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
+      const lineHeight = 7;
+      let y = margin;
+
+      doc.setFontSize(14);
+      doc.setTextColor(30, 64, 175);
+      doc.text('OCR Result', margin, y);
+      y += 10;
+
+      doc.setFontSize(8);
+      doc.setTextColor(156, 163, 175);
+      doc.text(new Date().toLocaleString('zh-CN'), margin, y);
+      y += 8;
+
+      doc.setDrawColor(229, 231, 235);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(31, 41, 55);
+
+      const lines = doc.splitTextToSize(text, maxWidth);
+      for (let i = 0; i < lines.length; i++) {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(lines[i], margin, y);
+        y += lineHeight;
+      }
+
+      doc.save('OCR提取_' + getTimestamp() + '.pdf');
+      closeExportMenu(btn);
+    }
+
+    function exportWord(btn) {
+      const text = getRawText(btn);
+      if (!text) return;
+      const html = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://schemas.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><title>OCR提取结果</title>
+        <style>body{font-family:SimSun,serif;font-size:12pt;line-height:1.8;padding:2.5cm;}h1{font-size:16pt;color:#1e40af;border-bottom:1px solid #e5e7eb;padding-bottom:8pt;}p{margin:0 0 6pt 0;text-align:justify;}.meta{font-size:9pt;color:#9ca3af;margin-bottom:12pt;}</style>
+        </head><body>
+        <h1>OCR 文字识别结果</h1>
+        <p class="meta">识别时间：${new Date().toLocaleString('zh-CN')}</p>
+        ${text.split('\n').map(line => line.trim() ? `<p>${escapeHtml(line)}</p>` : '').join('\n')}
+        </body></html>`;
+      const blob = new Blob(['\ufeff' + html], { type: 'application/msword;charset=utf-8' });
+      saveAs(blob, 'OCR提取_' + getTimestamp() + '.doc');
+      closeExportMenu(btn);
+    }
+
+    function closeExportMenu(btn) {
+      const menu = btn.closest('.export-dropdown')?.querySelector('.export-menu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    // Close export menu on outside click
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.export-dropdown')) {
+        document.querySelectorAll('.export-menu').forEach(m => m.classList.add('hidden'));
+      }
+    });
+
     // ===== Welcome message =====
     (function init() {
-      addSystemTextMessage('你好！我是图片文字提取助手 📷<br><br>上传一张图片，我来帮你提取文字。<br>支持 <strong>中英文</strong> 识别，所有处理都在你的浏览器本地完成，保护隐私。');
+      addSystemTextMessage('你好！我是图片文字提取助手 📷<br><br>上传一张图片，我来帮你提取文字。<br>支持 <strong>中英文</strong> 识别，识别后可导出 <strong>TXT / Markdown / PDF / Word</strong> 文档。<br>所有处理都在浏览器本地完成，保护隐私。');
     })();
   </script>
 

@@ -1,22 +1,24 @@
 {
   "name": "OCR图片文字提取",
   "short_name": "OCR提取",
-  "description": "免费在线OCR图片文字提取工具，支持多语言识别，纯浏览器本地处理",
+  "description": "免费在线OCR图片文字提取工具，支持多语言识别，可导出TXT/PDF/Word/Markdown文档",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
