@@ -1,4 +1,4 @@
-const config = {
+export default {
   appId: 'cn.zhinenti.ocrtool',
   appName: 'OCR识图',
   webDir: 'dist',
@@ -18,5 +18,3 @@ const config = {
     }
   }
 };
-
-exports.default = config;
