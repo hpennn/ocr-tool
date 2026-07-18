@@ -1,6 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'cn.zhinenti.ocrtool',
   appName: 'OCR识图',
   webDir: 'dist',
@@ -21,4 +19,4 @@ const config: CapacitorConfig = {
   }
 };
 
-export default config;
+exports.default = config;

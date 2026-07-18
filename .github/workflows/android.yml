@@ -20,8 +20,6 @@ jobs:
           java-version: 17
       - name: Install dependencies
         run: npm install
-      - name: Install TypeScript
-        run: npm install -D typescript
       - name: Build web assets
         run: npm run build
       - name: Add Android platform
