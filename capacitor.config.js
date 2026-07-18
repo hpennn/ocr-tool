@@ -2,9 +2,7 @@ export default {
   appId: 'cn.zhinenti.ocrtool',
   appName: 'OCR识图',
   webDir: 'dist',
-  server: {
-    androidScheme: 'https'
-  },
+  server: { androidScheme: 'https' },
   android: {
     allowMixedContent: false,
     captureInput: true,
