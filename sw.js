@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ocr-tool-v2';
-const STATIC_ASSETS = ['/', '/manifest.json', '/icon-192.png', '/favicon.svg'];
+const CACHE_NAME = 'ocr-tool-v3';
+const STATIC_ASSETS = ['/manifest.json', '/icon-192.png', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));
@@ -12,6 +12,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Always fetch HTML pages from network - never cache
+  if (event.request.headers.get('accept')?.includes('text/html')) { return; }
   event.respondWith(
     fetch(event.request).then(resp => {
       const clone = resp.clone();
