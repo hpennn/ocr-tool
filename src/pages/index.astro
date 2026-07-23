@@ -409,12 +409,6 @@ var _hmt = _hmt || [];
     }
 
     // ===== Event listeners =====
-    // Click to upload
-    uploadArea.addEventListener('click', (e) => {
-      // Don't trigger if clicking on the select
-      if (e.target.tagName === 'SELECT' || e.target.tagName === 'OPTION') return;
-      fileInput.click();
-    });
 
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
