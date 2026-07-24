@@ -176,6 +176,45 @@ var _hmt = _hmt || [];
     const fileInput = document.getElementById('file-input');
     const langSelect = document.getElementById('lang-select');
 
+    // ===== Worker management (reuse across recognitions) =====
+    let worker = null;
+    let currentLang = null;
+    let workerInitPromise = null;
+
+    async function initWorker(lang, loggerFn) {
+      // If worker already exists with the same language, reuse it
+      if (worker && currentLang === lang) {
+        return worker;
+      }
+
+      // If initialization is in progress, wait for it then check
+      if (workerInitPromise) {
+        await workerInitPromise;
+        if (worker && currentLang === lang) return worker;
+      }
+
+      // Terminate existing worker with different language
+      if (worker) {
+        await worker.terminate();
+        worker = null;
+        currentLang = null;
+      }
+
+      // Create new worker with CDN paths for faster loading
+      workerInitPromise = (async () => {
+        worker = await Tesseract.createWorker(lang, 1, {
+          workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
+          langPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/lang-data/',
+          logger: loggerFn,
+        });
+        currentLang = lang;
+        workerInitPromise = null;
+      })();
+
+      await workerInitPromise;
+      return worker;
+    }
+
     // ===== Message helpers =====
     function scrollToBottom() {
       requestAnimationFrame(() => {
@@ -354,28 +393,30 @@ var _hmt = _hmt || [];
       const lang = langSelect.value;
 
       try {
-        const result = await Tesseract.recognize(file, lang, {
-          logger: (m) => {
-            if (m.status === 'loading tesseract core') {
-              progressStatus.textContent = '加载识别引擎...';
-              typingStatus.textContent = '加载引擎中...';
-            } else if (m.status === 'initializing tesseract') {
-              progressStatus.textContent = '初始化引擎...';
-            } else if (m.status === 'loading language traineddata') {
-              progressStatus.textContent = '下载语言数据...';
-              typingStatus.textContent = '下载数据中...';
-            } else if (m.status === 'initializing api') {
-              progressStatus.textContent = '准备识别...';
-            } else if (m.status === 'recognizing text') {
-              progressStatus.textContent = '正在识别文字...';
-              typingStatus.textContent = '识别中...';
-            }
-            if (m.progress) {
-              const pct = Math.round(m.progress * 100);
-              progressBar.style.width = pct + '%';
-            }
-          },
+        // Get or create reusable worker
+        const w = await initWorker(lang, (m) => {
+          if (m.status === 'loading tesseract core') {
+            progressStatus.textContent = '加载识别引擎...';
+            typingStatus.textContent = '加载引擎中...';
+          } else if (m.status === 'initializing tesseract') {
+            progressStatus.textContent = '初始化引擎...';
+          } else if (m.status === 'loading language traineddata') {
+            progressStatus.textContent = '下载语言数据...';
+            typingStatus.textContent = '下载数据中...';
+          } else if (m.status === 'initializing api') {
+            progressStatus.textContent = '准备识别...';
+          } else if (m.status === 'recognizing text') {
+            progressStatus.textContent = '正在识别文字...';
+            typingStatus.textContent = '识别中...';
+          }
+          if (m.progress) {
+            const pct = Math.round(m.progress * 100);
+            progressBar.style.width = pct + '%';
+          }
         });
+
+        // Reuse existing worker for recognition (no re-download of lang data)
+        const result = await w.recognize(file);
 
         // Remove typing indicator
         typingEl.remove();
@@ -444,6 +485,15 @@ var _hmt = _hmt || [];
           if (file) handleFile(file);
           break;
         }
+      }
+    });
+
+    // Language change: terminate old worker so next recognition creates a new one
+    langSelect.addEventListener('change', async () => {
+      if (worker) {
+        await worker.terminate();
+        worker = null;
+        currentLang = null;
       }
     });
 
@@ -557,9 +607,30 @@ var _hmt = _hmt || [];
       }
     });
 
-    // ===== Welcome message =====
+    // ===== Welcome message & preload worker =====
     (function init() {
       addSystemTextMessage('你好！我是图片文字提取助手 📷<br><br>上传一张图片，我来帮你提取文字。<br>支持 <strong>中英文</strong> 识别，识别后可导出 <strong>TXT / Markdown / PDF / Word</strong> 文档。<br>所有处理都在浏览器本地完成，保护隐私。');
+
+      // Preload worker in background for faster first recognition
+      const preloadEl = addSystemTextMessage('⏳ 正在预加载识别引擎，请稍候...');
+      const defaultLang = langSelect.value;
+      initWorker(defaultLang, (m) => {
+        if (m.status === 'loading tesseract core') {
+          preloadEl.querySelector('p').innerHTML = '⏳ 正在加载识别引擎核心...';
+        } else if (m.status === 'loading language traineddata') {
+          const pct = m.progress ? Math.round(m.progress * 100) : 0;
+          preloadEl.querySelector('p').innerHTML = '⏳ 正在下载语言数据... ' + pct + '%';
+        } else if (m.status === 'initializing api') {
+          preloadEl.querySelector('p').innerHTML = '⏳ 正在初始化识别引擎...';
+        }
+      }).then(() => {
+        preloadEl.querySelector('p').innerHTML = '✅ 识别引擎已就绪，可以开始使用了！';
+        setTimeout(() => { preloadEl.remove(); }, 2000);
+      }).catch((err) => {
+        console.warn('Preload worker failed, will init on first use:', err);
+        preloadEl.querySelector('p').innerHTML = '⚠️ 引擎预加载失败，将在首次识别时加载。';
+        setTimeout(() => { preloadEl.remove(); }, 3000);
+      });
     })();
   </script>
 
