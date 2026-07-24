@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ocr-tool-v2';
+const CACHE_NAME = 'ocr-tool-v4';
 const STATIC_ASSETS = ['/', '/manifest.json', '/icon-192.png', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
