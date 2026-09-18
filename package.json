@@ -17,7 +17,9 @@
   },
   "dependencies": {
     "astro": "^7.0.6",
-    "@capacitor/core": "^5.7.0"
+    "@capacitor/core": "^5.7.0",
+    "tailwindcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^5.7.0",
