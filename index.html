@@ -359,7 +359,9 @@ var _hmt = _hmt || [];
       const lang = langSelect.value;
 
       try {
-        const result = await Tesseract.recognize(file, lang, {
+        const worker = await Tesseract.createWorker(lang, 1, {
+          langPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/tessdata',
+          corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0/tesseract-core.wasm.js',
           logger: (m) => {
             if (m.status === 'loading tesseract core') {
               progressStatus.textContent = '加载识别引擎...';
@@ -381,6 +383,8 @@ var _hmt = _hmt || [];
             }
           },
         });
+        const result = await worker.recognize(file);
+        await worker.terminate();
 
         // Remove typing indicator
         typingEl.remove();
