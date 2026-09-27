@@ -360,8 +360,8 @@ var _hmt = _hmt || [];
 
       try {
         const worker = await Tesseract.createWorker(lang, 1, {
-          langPath: 'https://registry.npmmirror.com/tesseract.js/5.1.1/files/tessdata',
-          corePath: 'https://registry.npmmirror.com/tesseract.js-core/5.0.0/files/tesseract-core.wasm.js',
+          langPath: '/tessdata/',
+          corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0',
           logger: (m) => {
             if (m.status === 'loading tesseract core') {
               progressStatus.textContent = '加载识别引擎...';

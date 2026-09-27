@@ -204,7 +204,7 @@ var _hmt = _hmt || [];
       workerInitPromise = (async () => {
         worker = await Tesseract.createWorker(lang, 1, {
           workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js',
-          langPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5/lang-data/',
+          langPath: '/tessdata/',
           logger: loggerFn,
         });
         currentLang = lang;
